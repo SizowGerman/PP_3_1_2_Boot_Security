@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Users</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .controls {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #eee;
+            background-color: #f9f9f9;
+        }
+        .user-controls {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #eee;
+            background-color: #f9f9f9;
+        }
+        .hidden {
+            display: none;
+        }
+        .error {
+            color: red;
+            font-size: 0.8em;
+        }
+        .error-input {
+            border: 1px solid red;
+        }
+    </style>
+</head>
+<body>
+<h1>Users</h1>
+
+<!-- User Table -->
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Email</th>
+    </tr>
+    <tr th:each="user : ${users}">
+        <td th:text="${user.id}"></td>
+        <td th:text="${user.name}"></td>
+        <td th:text="${user.email}"></td>
+    </tr>
+</table>
+
+
+<!-- Message Display Section -->
+<div th:if="${error}" class="alert alert-danger" style="color: red; padding: 10px; margin: 10px 0; border: 1px solid red;">
+    <span th:text="${error}"></span>
+</div>
+
+<div th:if="${success}" class="alert alert-success" style="color: green; padding: 10px; margin: 10px 0; border: 1px solid green;">
+    <span th:text="${success}"></span>
+</div>
+
+<!-- Add New User Form -->
+<div class="controls">
+    <h2>Add New User</h2>
+    <form th:action="@{/users/add}" method="post" th:object="${user}">
+        <div>
+            <label>Name:</label>
+            <input type="text" th:field="*{name}"
+                   pattern="[a-zA-Zа-яА-ЯёЁ\s\-']+"
+                   title="Only letters, spaces, hyphens and apostrophes allowed"
+                   required>
+            <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error"></span>
+        </div>
+
+        <div>
+            <label>Email:</label>
+            <input type="email" th:field="*{email}" required>
+            <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error"></span>
+        </div>
+
+        <button type="submit">Add User</button>
+    </form>
+</div>
+
+<!-- Search and Manage User -->
+<div class="controls">
+    <h2>Manage User</h2>
+    <form id="searchForm">
+        <label>Search by User ID:
+            <input type="number" id="searchId" name="searchId" min="1" required>
+        </label>
+        <button type="button" onclick="searchUser()">Find User</button>
+    </form>
+
+    <div id="userManagementSection" class="hidden">
+        <h3>Manage User ID: <span id="userIdDisplay"></span></h3>
+
+        <form th:action="@{/users/update}" method="post" id="editForm">
+            <input type="hidden" name="id" id="editUserId">
+
+            <div>
+                <label>Name:</label>
+                <input type="text" name="name" id="editName"
+                       pattern="[a-zA-Zа-яА-ЯёЁ\s\-']+"
+                       title="Only letters, spaces, hyphens and apostrophes allowed"
+                       required>
+                <span id="editNameError" class="error"></span>
+            </div>
+
+            <div>
+                <label>Email:</label>
+                <input type="email" name="email" id="editEmail" required>
+                <span id="editEmailError" class="error"></span>
+            </div>
+
+            <button type="submit">Update User</button>
+        </form>
+
+        <form th:action="@{/users/delete}" method="post" style="margin-top: 10px;">
+            <input type="hidden" name="id" id="deleteUserId">
+            <button type="submit" style="background-color: #ffcccc;">Delete User</button>
+        </form>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const users = /*[[${users}]]*/ [];
+
+    function searchUser() {
+        const searchId = parseInt(document.getElementById('searchId').value);
+        const foundUser = users.find(user => user.id == searchId);
+
+        if (foundUser) {
+            document.getElementById('userIdDisplay').textContent = foundUser.id;
+            document.getElementById('editUserId').value = foundUser.id;
+            document.getElementById('deleteUserId').value = foundUser.id;
+            document.getElementById('editName').value = foundUser.name || '';
+            document.getElementById('editEmail').value = foundUser.email || '';
+
+            document.getElementById('userManagementSection').classList.remove('hidden');
+        } else {
+            alert('User not found with ID: ' + searchId);
+            document.getElementById('userManagementSection').classList.add('hidden');
+        }
+    }
+    /*]]>*/
+</script>
+</body>
+</html>
