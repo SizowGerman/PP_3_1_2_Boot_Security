@@ -6,16 +6,22 @@ import org.springframework.security.core.GrantedAuthority;
 import java.util.Objects;
 
 @Entity
-@Table(name = "role")
+@Table(name = "roles")
 public class Role implements GrantedAuthority {
 
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(unique = true, nullable = false)
     private String role;
+
+    public Role() {}
+
+    public Role(String role) {
+        this.role = role;
+    }
 
     @Override
     public String getAuthority() {
@@ -24,10 +30,6 @@ public class Role implements GrantedAuthority {
 
     public Long getId() {
         return id;
-    }
-
-    public String getRole() {
-        return role;
     }
 
     @Override

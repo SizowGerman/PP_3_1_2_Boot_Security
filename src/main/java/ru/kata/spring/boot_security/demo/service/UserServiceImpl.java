@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.repository.UserRepo;
 import ru.kata.spring.boot_security.demo.model.User;
 
@@ -49,4 +50,21 @@ public class UserServiceImpl implements UserService {
     public void update(User user) {
         userRepo.update(user);
     }
+
+    public User findByUsername(String username) {
+        return userRepo.findByUsername(username);
+    }
+
+    @Override
+    public Role findRole(String role) {
+        return userRepo.findRole(role);
+    }
+
+    @Override
+    @Transactional
+    public void saveRole(String role) {
+        userRepo.saveRole(role);
+    }
+
+
 }

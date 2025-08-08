@@ -2,6 +2,7 @@ package ru.kata.spring.boot_security.demo.repository;
 
 import jakarta.persistence.*;
 import org.springframework.stereotype.Repository;
+import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 
 import java.util.List;
@@ -33,6 +34,27 @@ public class UserRepo {
         if (user != null) {
             entityManager.remove(user);
         }
+    }
+
+    public void saveRole(String role) {
+        Role roleObj = new Role(role);
+        entityManager.persist(roleObj);
+    }
+
+    public User findByUsername(String username) {
+        try {
+            Query query = entityManager.createQuery("from User u where u.name = :username");
+            query.setParameter("username", username);
+            return (User) query.getSingleResult();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public Role findRole(String role) {
+        Query query = entityManager.createQuery("from Role r where r.role = :role");
+        query.setParameter("role", role);
+        return (Role) query.getSingleResult();
     }
 
 }

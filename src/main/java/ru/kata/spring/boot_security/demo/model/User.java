@@ -2,8 +2,11 @@ package ru.kata.spring.boot_security.demo.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
@@ -24,8 +27,33 @@ public class User {
     @Email(message = "Email should be valid")
     private String email;
 
-    private Set<Role> roles;
+    @Column(nullable = false)
     private String password;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "users_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
+
+    public User() {}
+
+    public User(String name, String email, String password, Set<Role> roles) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.roles = roles;
+    }
+
+    //DEFAULT USER
+
+    public User(String name, String email, String password) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
 
     public Long getId() {
         return id;
@@ -47,9 +75,21 @@ public class User {
         this.email = email;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(id, name, email);
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     @Override
