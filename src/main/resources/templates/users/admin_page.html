@@ -1,0 +1,99 @@
+<!-- Add New User Form -->
+<div class="controls">
+  <h2>Add New User</h2>
+  <form th:action="@{/admin/add}" method="post" th:object="${user}">
+    <div>
+      <label>Name:</label>
+      <input type="text" th:field="*{name}"
+             pattern="[a-zA-Zа-яА-ЯёЁ\s\-']+"
+             title="Only letters, spaces, hyphens and apostrophes allowed"
+             required>
+      <span th:if="${#fields.hasErrors('name')}" th:errors="*{name}" class="error"></span>
+    </div>
+
+    <div>
+      <label>Email:</label>
+      <input type="email" th:field="*{email}" required>
+      <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error"></span>
+    </div>
+
+    <div>
+      <label>Password:</label>
+      <input type="password" th:field="*{password}" minlength="6" required>
+      <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error"></span>
+    </div>
+
+    <button type="submit">Add User</button>
+  </form>
+</div>
+
+<!-- Search and Manage User -->
+<div class="controls">
+  <h2>Manage User</h2>
+  <form id="searchForm">
+    <label>Search by User ID:
+      <input type="number" id="searchId" name="searchId" min="1" required>
+    </label>
+    <button type="button" onclick="searchUser()">Find User</button>
+  </form>
+
+  <div id="userManagementSection" class="hidden">
+    <h3>Manage User ID: <span id="userIdDisplay"></span></h3>
+
+    <form th:action="@{/admin/update}" method="post" id="editForm">
+      <input type="hidden" name="id" id="editUserId">
+
+      <div>
+        <label>Name:</label>
+        <input type="text" name="name" id="editName"
+               pattern="[a-zA-Zа-яА-ЯёЁ\s\-']+"
+               title="Only letters, spaces, hyphens and apostrophes allowed"
+               required>
+        <span id="editNameError" class="error"></span>
+      </div>
+
+      <div>
+        <label>Email:</label>
+        <input type="email" name="email" id="editEmail" required>
+        <span id="editEmailError" class="error"></span>
+      </div>
+
+      <div>
+        <label>Password: (leave empty if no change)</label>
+        <input type="password" name="password" id="editPassword" minlength="4" placeholder="******">
+      </div>
+
+      <button type="submit">Update User</button>
+    </form>
+
+    <form th:action="@{/admin/delete}" method="post" style="margin-top: 10px;">
+      <input type="hidden" name="id" id="deleteUserId">
+      <button type="submit" style="background-color: #ffcccc;">Delete User</button>
+    </form>
+  </div>
+</div>
+
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  const users = /*[[${users}]]*/ [];
+
+  function searchUser() {
+    const searchId = parseInt(document.getElementById('searchId').value);
+    const foundUser = users.find(user => user.id === searchId);
+
+    if (foundUser) {
+      document.getElementById('userIdDisplay').textContent = foundUser.id;
+      document.getElementById('editUserId').value = foundUser.id;
+      document.getElementById('deleteUserId').value = foundUser.id;
+      document.getElementById('editName').value = foundUser.name || '';
+      document.getElementById('editEmail').value = foundUser.email || '';
+      document.getElementById('editPassword').value = ''; // password empty on update form
+
+      document.getElementById('userManagementSection').classList.remove('hidden');
+    } else {
+      alert('User not found with ID: ' + searchId);
+      document.getElementById('userManagementSection').classList.add('hidden');
+    }
+  }
+  /*]]>*/
+</script>
