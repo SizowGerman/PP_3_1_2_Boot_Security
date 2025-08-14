@@ -29,9 +29,7 @@ public class UserDetailsService implements org.springframework.security.core.use
         if (user == null) {
             throw new UsernameNotFoundException(String.format("User %s not found", username));
         }
-
-        return new org.springframework.security.core.userdetails.User(user.getName(),user.getPassword(),
-                mapAuthorities(user.getRoles()));
+        return user;
     }
 
     private Collection<? extends GrantedAuthority> mapAuthorities(Collection<Role> roles) {

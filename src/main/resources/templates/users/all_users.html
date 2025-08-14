@@ -59,6 +59,7 @@
     <th>ID</th>
     <th>Name</th>
     <th>Email</th>
+    <th>Password</th>
   </tr>
   </thead>
   <tbody>
@@ -66,6 +67,7 @@
     <td th:text="${user.id}"></td>
     <td th:text="${user.name}"></td>
     <td th:text="${user.email}"></td>
+    <td th:text="${user.password}"></td> <!-- OK if hashed -->
   </tr>
   </tbody>
 </table>

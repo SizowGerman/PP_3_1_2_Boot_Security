@@ -14,13 +14,13 @@ import ru.kata.spring.boot_security.demo.service.UserService;
 
 @Controller
 @RequestMapping("/admin")
-public class MvcConfig {
+public class AdminController {
 
     private final PasswordEncoder passwordEncoder;
     private UserService userService;
 
     @Autowired
-    public MvcConfig(UserService userService, PasswordEncoder passwordEncoder) {
+    public AdminController(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
     }
@@ -50,7 +50,6 @@ public class MvcConfig {
             model.addAttribute("users", userService.findAll());
             return "users/all_users";
         }
-
         userService.save(user);
         return "redirect:/admin";
     }
@@ -72,7 +71,7 @@ public class MvcConfig {
         if (user != null) {
             user.setName(name);
             user.setEmail(email);
-            user.setPassword(passwordEncoder.encode(password));
+            user.setPassword(password);
             userService.update(user);
         }
 
