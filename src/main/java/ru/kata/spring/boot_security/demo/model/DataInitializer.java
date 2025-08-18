@@ -37,7 +37,7 @@ public class DataInitializer implements CommandLineRunner {
 
         //BASE ADMIN
         if (userService.findByUsername("admin") == null) {
-            User user = new User("admin", "admin@admin.com", passwordEncoder.encode("admin"),roleUserAdmin);
+            User user = new User("admin", "admin@admin.com", "admin",roleUserAdmin);
             userService.save(user);
         }
 
@@ -45,7 +45,7 @@ public class DataInitializer implements CommandLineRunner {
         roleUser.add(userService.findRole("ROLE_USER"));
         //BASE USER
         if (userService.findByUsername("user") == null) {
-            User user = new User("user", "user@user.com", passwordEncoder.encode("user"),roleUser);
+            User user = new User("user", "user@user.com", "user",roleUser);
             userService.save(user);
         }
     }

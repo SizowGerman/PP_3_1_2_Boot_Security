@@ -12,7 +12,9 @@ import ru.kata.spring.boot_security.demo.model.User;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -42,10 +44,18 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void save(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        Set<Role> roles = new HashSet<>();
-        roles.add(userRepo.findRole("ROLE_USER"));
+
+        if (user.getPassword() != null && !user.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+
+        Set<Role> roles = user.getRoleNames().stream()
+                .map(roleName -> userRepo.findRole(roleName))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
         user.setRoles(roles);
+
         userRepo.save(user);
     }
 
@@ -59,8 +69,22 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void update(User user) {
         if (user.getPassword() != null && !user.getPassword().isBlank()) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            // CHECK for encoded Bcrypt
+            if (user.getPassword().length()!=60) {
+                user.setPassword(passwordEncoder.encode(user.getPassword()));
+            }
         }
+
+        // Always ROLE_USER
+        Set<Role> roles = new HashSet<>();
+        roles.add(userRepo.findRole("ROLE_USER"));
+
+        // Add ROLE_ADMIN if checkbox
+        if (user.getRoleNames() != null && user.getRoleNames().contains("ROLE_ADMIN")) {
+            roles.add(userRepo.findRole("ROLE_ADMIN"));
+        }
+
+        user.setRoles(roles);
         userRepo.update(user);
     }
 

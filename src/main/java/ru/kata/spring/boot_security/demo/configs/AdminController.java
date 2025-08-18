@@ -12,6 +12,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
+import java.util.Set;
+
 @Controller
 @RequestMapping("/admin")
 public class AdminController {
@@ -60,6 +62,7 @@ public class AdminController {
                              @RequestParam  String name,
                              @RequestParam String email,
                              @RequestParam(required = false) String password,
+                             @RequestParam(required = false) Set<String> roleNames,
                              RedirectAttributes redirectAttributes) {
 
         if (!name.matches("^[a-zA-Zа-яА-ЯёЁ\\s\\-']+$")) {
@@ -71,7 +74,15 @@ public class AdminController {
         if (user != null) {
             user.setName(name);
             user.setEmail(email);
-            user.setPassword(password);
+
+            if (password != null && !password.isBlank()) {
+                user.setPassword(password);
+            }
+
+            if (roleNames != null && !roleNames.isEmpty()) {
+                user.setRoleNames(roleNames);
+            }
+
             userService.update(user);
         }
 
