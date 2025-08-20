@@ -33,34 +33,18 @@
         </form>
     </div>
 </nav>
-<div class="d-flex">
-    <!-- Sidebar -->
-    <div class="sidebar bg-light p-3">
-        <h5 th:text="${#authentication.name} + ' with roles: ' + ${#authentication.principal.authorities}"></h5>
-        <ul class="nav flex-column mt-4">
-            <li class="nav-item">
-                <a class="nav-link" th:classappend="${activePage == 'admin'} ? 'active'" th:href="@{/basic_home}">Admin</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" th:classappend="${activePage == 'user'} ? 'active'" th:href="@{/user}">User</a>
-            </li>
-        </ul>
-    </div>
-</div>
-
-
 
 <div class="container-fluid">
     <div class="row">
         <!-- Sidebar -->
         <nav class="col-md-2 d-none d-md-block bg-light sidebar">
             <div class="position-sticky pt-3">
-                <ul class="nav flex-column">
+                <ul class="nav flex-column mt-4">
                     <li class="nav-item">
-                        <a class="nav-link active" href="#">Admin</a> <!--TODO Add side panel func-->
+                        <a class="nav-link" th:classappend="${activePage == 'admin'} ? 'active'" th:href="@{/admin/admin_page}">Admin</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">User</a>
+                        <a class="nav-link" th:classappend="${activePage == 'user'} ? 'active'" th:href="@{/user}">User</a>
                     </li>
                 </ul>
             </div>
