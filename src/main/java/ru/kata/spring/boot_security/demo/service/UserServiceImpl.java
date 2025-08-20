@@ -68,10 +68,18 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public void update(User user) {
+
+        User oldUser = userRepo.findById(user.getId());
+        if (oldUser == null) {
+            throw new RuntimeException("User not found with id: " + user.getId());
+        }
+        System.out.println("Updating user: " + oldUser);
+
+
         if (user.getPassword() != null && !user.getPassword().isBlank()) {
             // CHECK for encoded Bcrypt
             if (user.getPassword().length()!=60) {
-                user.setPassword(passwordEncoder.encode(user.getPassword()));
+                oldUser.setPassword(passwordEncoder.encode(user.getPassword()));
             }
         }
 
@@ -84,8 +92,10 @@ public class UserServiceImpl implements UserService {
             roles.add(userRepo.findRole("ROLE_ADMIN"));
         }
 
-        user.setRoles(roles);
-        userRepo.update(user);
+        oldUser.setRoles(roles);
+        oldUser.setName(user.getName());
+        oldUser.setEmail(user.getEmail());
+        userRepo.save(oldUser);
     }
 
     public User findByUsername(String username) {

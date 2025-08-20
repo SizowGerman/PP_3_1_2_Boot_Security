@@ -2,6 +2,7 @@ package ru.kata.spring.boot_security.demo.configs;
 
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +10,13 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Controller
@@ -36,10 +41,10 @@ public class AdminController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin_page")
-    public String adminPage(Model model) {
+    public String adminPage(Model model, @AuthenticationPrincipal User UserDetails) {
         model.addAttribute("users", userService.findAll());
-        model.addAttribute("user", new User());
-        return "users/admin_page";
+        model.addAttribute("user", UserDetails);
+        return "users/basic_home";
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -56,7 +61,7 @@ public class AdminController {
         return "redirect:/admin";
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    /*@PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/update")
     public String updateUser(@RequestParam Long id,
                              @RequestParam  String name,
@@ -72,6 +77,7 @@ public class AdminController {
 
         User user = userService.findById(id);
         if (user != null) {
+            System.out.println("1");
             user.setName(name);
             user.setEmail(email);
 
@@ -79,15 +85,68 @@ public class AdminController {
                 user.setPassword(password);
             }
 
+            Set<Role> roles = new HashSet<>();
+            roles.add(userService.findRole("ROLE_USER"));
+
             if (roleNames != null && !roleNames.isEmpty()) {
                 user.setRoleNames(roleNames);
+            } else {
+                Set<Role> basicUserRole = new HashSet<>();
+                roles.add(userService.findRole("ROLE_USER"));
+                user.setRoles(basicUserRole);
+            }
+
+            System.out.println("Updating user:");
+            System.out.println("ID: " + id);
+            System.out.println("Name: " + name);
+            System.out.println("Email: " + email);
+            System.out.println("Roles: " + roleNames);
+            System.out.println("Password: " + password);
+            userService.update(user);
+        }
+
+        return "redirect:/admin";
+
+    }*/
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/update")
+    public String updateUser(
+            @RequestParam Long id,
+            @RequestParam String name,
+            @RequestParam String email,
+            @RequestParam(required = false) String password,
+            @RequestParam(required = false) List<String> roleNames, // <- changed from Set<String>
+            RedirectAttributes redirectAttributes) {
+
+        System.out.println(">>> /update called, id=" + id + ", name=" + name + ", email=" + email + ", roles=" + roleNames);
+
+        if (!name.matches("^[a-zA-Zа-яА-ЯёЁ\\s\\-']+$")) {
+            redirectAttributes.addFlashAttribute("error", "Invalid name format");
+            return "redirect:/admin";
+        }
+
+        User user = userService.findById(id);
+
+        if (user != null) {
+            user.setName(name);
+            user.setEmail(email);
+
+            if (password != null && !password.isBlank()) {
+                user.setPassword(password);
+            }
+
+            // Convert list to set and save roles
+            if (roleNames != null && !roleNames.isEmpty()) {
+                user.setRoleNames(new HashSet<>(roleNames));
+            } else {
+                user.setRoleNames(new HashSet<>(Collections.singletonList("ROLE_USER")));
             }
 
             userService.update(user);
         }
 
         return "redirect:/admin";
-
     }
 
     @PreAuthorize("hasRole('ADMIN')")

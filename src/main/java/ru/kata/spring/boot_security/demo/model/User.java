@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -120,6 +121,12 @@ public class User implements UserDetails {
 
     public Set<String> getRoleNames() {
         return roleNames;
+    }
+
+    public String getRoleNamesString() {
+        return this.roles.stream()
+                .map(role -> role.toString())
+                .collect(Collectors.joining(" , "));
     }
 
     public void setRoleNames(Set<String> roleNames) {
