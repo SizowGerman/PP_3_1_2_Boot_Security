@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Admin Panel</title>
@@ -41,7 +41,7 @@
         <nav class="col-md-2 d-none d-md-block bg-light sidebar">
             <div class="position-sticky pt-3" style="top: 56px;"> <!-- Account for fixed navbar -->
                 <ul class="nav flex-column mt-4">
-                    <li class="nav-item">
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
                         <a class="nav-link" th:classappend="${activePage == 'admin'} ? 'active'" th:href="@{/admin/admin_page}">Admin</a>
                     </li>
                     <li class="nav-item">

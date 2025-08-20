@@ -20,7 +20,7 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         String redirectURL = "/user";
 
         if(autorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-            redirectURL = "/admin";
+            redirectURL = "/admin/admin_page";
         }
 
         response.sendRedirect(redirectURL);
