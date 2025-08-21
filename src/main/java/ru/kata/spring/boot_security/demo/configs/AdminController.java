@@ -57,7 +57,7 @@ public class AdminController {
             return "users/all_users";
         }
         userService.save(user);
-        return "redirect:/admin_panel";
+        return "redirect:/admin/admin_page";
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -74,7 +74,7 @@ public class AdminController {
 
         if (!name.matches("^[a-zA-Zа-яА-ЯёЁ\\s\\-']+$")) {
             redirectAttributes.addFlashAttribute("error", "Invalid name format");
-            return "redirect:/admin_panel";
+            return "redirect:/admin/admin_page";
         }
 
         User user = userService.findById(id);
@@ -97,14 +97,14 @@ public class AdminController {
             userService.update(user);
         }
 
-        return "redirect:/admin_panel";
+        return "redirect:/admin/admin_page";
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/delete")
     public String deleteUser(@RequestParam Long id) {
         userService.delete(id);
-        return "redirect:/admin_panel";
+        return "redirect:/admin/admin_page";
     }
 
 }
