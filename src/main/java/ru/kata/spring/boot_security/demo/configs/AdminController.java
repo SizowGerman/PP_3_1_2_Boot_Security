@@ -43,7 +43,7 @@ public class AdminController {
         model.addAttribute("users", userService.findAll());
         model.addAttribute("user", UserDetails);
         model.addAttribute("activePage", "admin");
-        return "users/admin_panel";
+        return "users/admin_dynamic";
     }
 
     @PreAuthorize("hasRole('ADMIN')")

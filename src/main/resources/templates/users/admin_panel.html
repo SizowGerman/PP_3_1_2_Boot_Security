@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Admin Panel</title>
@@ -19,16 +19,18 @@
             margin-left: 220px;
             padding: 20px;
         }
+        body {
+            padding-top: 56px; /* navbar height */
+        }
     </style>
 </head>
 <body>
-<nav class="navbar navbar-dark bg-dark">
+
+<!-- Navbar -->
+<nav class="navbar navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
-        <span class="navbar-text text-white" th:text=" ' (' + ${user.getEmail()} + ') ' + ' with roles: ' + ${user.getRoleNamesString()}">
-            <!-- Fallback text if Thymeleaf isn't processed -->
-            unknown@mail.ru with roles: UNKNOWN
-        </span>
-        <form th:action="@{/logout}" method="post">
+        <span class="navbar-text text-white" id="currentUser">Loading user...</span>
+        <form action="/logout" method="post">
             <button type="submit" class="btn btn-outline-light">Logout</button>
         </form>
     </div>
@@ -36,285 +38,82 @@
 
 <div class="container-fluid">
     <div class="row">
+
         <!-- Sidebar -->
         <nav class="col-md-2 d-none d-md-block bg-light sidebar">
             <div class="position-sticky pt-3">
                 <ul class="nav flex-column mt-4">
-                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
-                        <a class="nav-link" th:classappend="${activePage == 'admin'} ? 'active'" th:href="@{/admin/admin_page}">Admin</a>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" id="adminTabLink">Admin</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" th:classappend="${activePage == 'user'} ? 'active'" th:href="@{/user}">User</a>
+                        <a href="#" class="nav-link" id="userTabLink">User</a>
                     </li>
                 </ul>
             </div>
         </nav>
 
         <!-- Main content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Admin panel</h1>
-            </div>
-
-            <!-- Tabs -->
-            <ul class="nav nav-tabs">
-                <li class="nav-item">
-                    <a class="nav-link active" data-bs-toggle="tab" href="#usersTableTab">Users table</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" data-bs-toggle="tab" href="#newUserTab">New User</a>
-                </li>
-            </ul>
-
-            <div class="tab-content mt-3">
-                <!-- Users Table -->
-                <div class="tab-pane fade show active" id="usersTableTab">
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Edit</th>
-                                <th>Delete</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr th:each="user : ${users}">
-                                <td th:text="${user.id}">ID</td>
-                                <td th:text="${user.name}">Name</td>
-                                <td th:text="${user.email}">Email</td>
-                                <td th:text="${user.getRoleNamesString()}">Role</td>
-                                <td>
-                                    <button class="btn btn-info btn-sm"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#editUserModal"
-                                            th:attr="data-id=${user.id},
-                                                        data-name=${user.name},
-                                                        data-email=${user.email},
-                                                        data-roles=${user.getRoleNamesString()}">
-                                        Edit
-                                    </button>
-                                </td>
-                                <!--TODO Add popup confirm delete-->
-                                <td>
-                                    <button type="button"
-                                            class="btn btn-danger btn-sm"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#deleteUserModal"
-                                            th:attr="data-id=${user.id},
-                                                data-name=${user.name},
-                                                data-email=${user.email},
-                                                data-roles=${user.getRoleNamesString()}">
-                                        Delete
-                                    </button>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- New User Form -->
-                <div class="tab-pane fade" id="newUserTab">
-                    <form th:action="@{/admin/add}" method="post">
-
-                        <div class="mb-3">
-                            <label for="name" class="form-label">User name</label>
-                            <input type="text" class="form-control" id="name" name="name"
-                                   required
-                                   pattern="^[a-zA-Zа-яА-ЯёЁ\s\-']+$">
-                            <div class="invalid-feedback">
-                                Please provide a valid name (letters, spaces, hyphens and apostrophes only)
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email"
-                                   required>
-                            <div class="invalid-feedback">
-                                Please provide a valid email address
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password"
-                                   required
-                                   minlength="3">
-                            <div class="invalid-feedback">
-                                Password must be at least 3 characters long
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="roles" class="form-label">Roles</label>
-                            <select class="form-select" id="roles1" name="roleNames" multiple required>
-                                <option value="ROLE_USER">USER</option>
-                                <option value="ROLE_ADMIN">ADMIN</option>
-                            </select>
-                            <small class="text-muted">Hold Ctrl/Cmd to select multiple roles</small>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">Create User</button>
-                    </form>
-                </div>
-            </div>
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content" id="contentArea">
+            <h1>Loading...</h1>
         </main>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const modalEl = document.getElementById('editUserModal');
-
-        modalEl.addEventListener('show.bs.modal', (event) => {
-            const btn = event.relatedTarget;
-            if (!btn) return;
-
-                const id    = btn.getAttribute('data-id');
-                const name  = btn.getAttribute('data-name')  || '';
-                const email = btn.getAttribute('data-email') || '';
-                const roles = (btn.getAttribute('data-roles') || '').toUpperCase();
-
-                console.log("Modal opening with:", {id, name, email, roles});
-
-                modalEl.querySelector('#editId').value = id;
-                modalEl.querySelector('#editIdDisplay').value = id;
-                modalEl.querySelector('#editName').value = name;
-                modalEl.querySelector('#editEmail').value = email;
-                modalEl.querySelector('#editPassword').value = '';
-
-                const rolesSelect = modalEl.querySelector('#roles');
-
-                Array.from(rolesSelect.options).forEach(option => {
-                    option.selected = roles.includes(option.value.toUpperCase());
-                });
-            });
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const editForm = document.getElementById('editUserForm');
-
-            editForm.addEventListener('submit', (event) => {
-                event.preventDefault(); // Stop the default submission temporarily
-
-                const formData = new FormData(editForm);
-                console.log("Submitting form with data:");
-                for (let [key, value] of formData.entries()) {
-                    console.log(`${key}: ${value}`);
-                }
-
-                // Now submit the form
-                editForm.submit();
-            });
-        });
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const modalEl = document.getElementById('deleteUserModal');
-
-            modalEl.addEventListener('show.bs.modal', (event) => {
-                const btn = event.relatedTarget;
-                if (!btn) return;
-
-                const id    = btn.getAttribute('data-id');
-                const name  = btn.getAttribute('data-name');
-                const email = btn.getAttribute('data-email');
-                const roles = btn.getAttribute('data-roles');
-
-                modalEl.querySelector('#deleteId').value = id;
-                modalEl.querySelector('#deleteIdDisplay').value = id;
-                modalEl.querySelector('#deleteName').value = name;
-                modalEl.querySelector('#deleteEmail').value = email;
-                modalEl.querySelector('#deleteRoles').value = roles;
-            });
-        });
-    </script>
 
 
-<!-- Edit User -->
-<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editUserModalLabel">Edit user</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="editUserForm" th:action="@{/admin/update}" method="post">
-                    <input type="hidden" id="editId" name="id">
-
-                    <div class="mb-3">
-                        <label class="form-label">User ID</label>
-                        <input type="text" class="form-control" id="editIdDisplay" disabled>
-                    </div>
-
+            <form id="editUserForm">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editId">
                     <div class="mb-3">
                         <label class="form-label">Name</label>
-                        <input type="text" class="form-control" id="editName" name="name" required>
+                        <input type="text" id="editName" class="form-control" required>
                     </div>
-
                     <div class="mb-3">
                         <label class="form-label">Email</label>
-                        <input type="email" class="form-control" id="editEmail" name="email" required>
+                        <input type="email" id="editEmail" class="form-control" required>
                     </div>
-
                     <div class="mb-3">
                         <label class="form-label">Password (leave blank to keep)</label>
-                        <input type="password" class="form-control" id="editPassword" name="password">
+                        <input type="password" id="editPassword" class="form-control">
                     </div>
-
                     <div class="mb-3">
-                        <label for="roles" class="form-label">Roles</label>
-                        <select class="form-select" id="roles" name="roleNames" multiple required>
+                        <label class="form-label">Roles</label>
+                        <select id="editRoles" class="form-select" multiple required>
                             <option value="ROLE_USER">USER</option>
                             <option value="ROLE_ADMIN">ADMIN</option>
                         </select>
-                        <small class="text-muted">Hold Ctrl/Cmd to select multiple roles</small>
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="submit" form="editUserForm" class="btn btn-primary">Save changes</button>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-hidden="true">
+<!-- Delete User Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form th:action="@{/admin/delete}" method="post" id="deleteUserForm">
+            <form id="deleteUserForm">
                 <div class="modal-header">
-                    <h5 class="modal-title">Confirm Delete User</h5>
+                    <h5 class="modal-title">Confirm Delete</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" name="id" id="deleteId">
-                    <div class="mb-3">
-                        <label class="form-label">User ID</label>
-                        <input type="text" class="form-control" id="deleteIdDisplay" disabled>
-                    </div>
-
-                    <div class="mb-3">
-                        <label>Name</label>
-                        <input type="text" class="form-control" id="deleteName" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label>Email</label>
-                        <input type="text" class="form-control" id="deleteEmail" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label>Roles</label>
-                        <input type="text" class="form-control" id="deleteRoles" readonly>
-                    </div>
+                    <input type="hidden" id="deleteId">
+                    <p>Are you sure you want to delete <span id="deleteUserName"></span>?</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -324,5 +123,190 @@
         </div>
     </div>
 </div>
+
+<script>
+    const apiUrl = '/api/users';
+
+    // Load and display current user in navbar
+    async function loadCurrentUser() {
+        try {
+            const res = await fetch(`${apiUrl}/currentUser`, {credentials: 'include'});
+            if (!res.ok) throw new Error('Failed to fetch user');
+            const user = await res.json();
+            document.getElementById('currentUser').textContent = `${user.email} with roles: ${user.roleNamesString}`;
+            return user;
+        } catch (err) {
+            console.error(err);
+            document.getElementById('currentUser').textContent = 'Error loading user';
+            return null;
+        }
+    }
+
+    // Load Admin content (all users table)
+    async function loadAdminContent() {
+        const res = await fetch(apiUrl, {credentials: 'include'});
+        const users = await res.json();
+
+        let html = `
+        <h1>Admin Panel</h1>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Roles</th>
+                        <th>Edit</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+        users.forEach(user => {
+            html += `
+            <tr>
+                <td>${user.id}</td>
+                <td>${user.name}</td>
+                <td>${user.email}</td>
+                <td>${user.roleNamesString}</td>
+                <td><button class="btn btn-info btn-sm" onclick="openEditModal(${user.id})">Edit</button></td>
+                <td><button class="btn btn-danger btn-sm" onclick="openDeleteModal(${user.id})">Delete</button></td>
+            </tr>`;
+        });
+        html += `</tbody></table></div>`;
+        document.getElementById('contentArea').innerHTML = html;
+    }
+
+    // Load User tab (current user)
+    async function loadUserContent() {
+        const user = await loadCurrentUser();
+        if (!user) return;
+        const html = `
+        <h1>User</h1>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Roles</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>${user.id}</td>
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td>${user.roleNamesString}</td>
+                </tr>
+            </tbody>
+        </table>`;
+        document.getElementById('contentArea').innerHTML = html;
+    }
+
+    // Sidebar click handlers
+    document.getElementById('adminTabLink').addEventListener('click', e => {
+        e.preventDefault();
+        document.getElementById('adminTabLink').classList.add('active');
+        document.getElementById('userTabLink').classList.remove('active');
+        loadAdminContent();
+    });
+
+    document.getElementById('userTabLink').addEventListener('click', e => {
+        e.preventDefault();
+        document.getElementById('userTabLink').classList.add('active');
+        document.getElementById('adminTabLink').classList.remove('active');
+        loadUserContent();
+    });
+
+    // Initial load
+    document.addEventListener('DOMContentLoaded', async () => {
+        await loadCurrentUser();
+        loadAdminContent(); // default tab
+    });
+
+    // Open Edit modal
+    async function openEditModal(id) {
+        const res = await fetch(`${apiUrl}/${id}`, {credentials: 'include'});
+        const user = await res.json();
+
+        document.getElementById('editId').value = user.id;
+        document.getElementById('editName').value = user.name;
+        document.getElementById('editEmail').value = user.email;
+        document.getElementById('editPassword').value = '';
+
+        const select = document.getElementById('editRoles');
+        Array.from(select.options).forEach(opt => {
+            opt.selected = user.roleNames.includes(opt.value.replace('ROLE_', ''));
+        });
+
+        new bootstrap.Modal(document.getElementById('editUserModal')).show();
+    }
+
+    // Submit Edit form
+    document.getElementById('editUserForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        const id = document.getElementById('editId').value;
+        const name = document.getElementById('editName').value;
+        const email = document.getElementById('editEmail').value;
+        const password = document.getElementById('editPassword').value;
+        const roles = Array.from(document.getElementById('editRoles').selectedOptions).map(o => o.value);
+
+        await fetch(`${apiUrl}/${id}`, {
+            method: 'PUT',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({name,email,password,roleNames: roles})
+        });
+
+        bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+        loadAdminContent(); // reload table
+    });
+
+    // Open Delete modal
+    async function openDeleteModal(id) {
+        const res = await fetch(`${apiUrl}/${id}`, {credentials: 'include'});
+        const user = await res.json();
+
+        document.getElementById('deleteId').value = user.id;
+        document.getElementById('deleteUserName').textContent = user.name;
+
+        new bootstrap.Modal(document.getElementById('deleteUserModal')).show();
+    }
+
+    // Submit Delete form
+    document.getElementById('deleteUserForm').addEventListener('submit', async e => {
+        e.preventDefault();
+        const id = document.getElementById('deleteId').value;
+
+        await fetch(`${apiUrl}/${id}`, {method:'DELETE', credentials:'include'});
+
+        bootstrap.Modal.getInstance(document.getElementById('deleteUserModal')).hide();
+        loadAdminContent(); // reload table
+    });
+    async function loadUsers() {
+        const res = await fetch('/api/users', { credentials: 'include' });
+        const users = await res.json();
+
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = ''; // clear table
+
+        users.forEach(user => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+            <td>${user.id}</td>
+            <td>${user.name}</td>
+            <td>${user.email}</td>
+            <td>${user.roleNamesString}</td>
+            <td><button class="btn btn-info btn-sm" onclick="openEditModal(${user.id})">Edit</button></td>
+            <td><button class="btn btn-danger btn-sm" onclick="openDeleteModal(${user.id})">Delete</button></td>
+        `;
+            tbody.appendChild(tr);
+        });
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        loadUsers();
+    });
+</script>
+
 </body>
 </html>
